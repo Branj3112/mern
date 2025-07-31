@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diseña tu Camiseta</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: white;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h2 {
+      color: black;
+      margin-bottom: 40px;
+      font-size: 2rem;
+    }
+
+    .camiseta-container {
+      display: inline-block;
+      background: #ffffff;
+      padding: 30px;
+      border: 4px dashed #000000;
+      border-radius: 16px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+      margin-bottom: 30px;
+      transition: border-color 0.3s;
+    }
+
+    .camiseta-container:hover {
+      border-color: #faf6f6;
+    }
+
+    svg {
+      width: 500px; /* Aumentado el tamaño */
+      height: auto;
+      cursor: pointer;
+    }
+
+    .parte-camiseta:hover {
+      stroke: #0e3f21;
+      stroke-width: 0.5;
+      opacity: 0.8;
+    }
+
+    #color-picker {
+      width: 80px;
+      height: 50px;
+      border: none;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    button {
+      padding: 15px 25px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: blue;
+      color: rgb(255, 255, 255);
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: white;
+    }
+
+    #btn-limpiar {
+      background-color: blue;
+    }
+
+    #btn-limpiar:hover {
+      background-color: white;
+    }
+  </style>
+</head>
+<body>
+  <h2>Diseña tu Camiseta</h2>
+
+  <div class="camiseta-container">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 2 26 14" id="camiseta-svg">
+      <path class="parte-camiseta" id="manga-izquierda" d="M 4 8 M 5 3 L 5 6 L 3 7 L 1 5" fill="#000000" />
+      <path class="parte-camiseta" id="torso" d="M 9 5 L 7 3 L 5 3 L 5 6 L 5 12 L 13 12 L 13 6 L 13 3 L 11 3" fill="#000000" />
+      <path class="parte-camiseta" id="manga-derecha" d="M 13 6 L 13 3 L 17 5 L 15 7" fill="#000000" />
+      <path class="parte-camiseta" id="cuelloizq" d="M 8 2 L 7 3 L 9 5 L 8 3" fill="#000000" />
+      <path class="parte-camiseta" id="cuelloder" d="M 10 2 L 11 3 L 9 5 L 10 3 M 1 4" fill="#000000" />
+    </svg>
+  </div>
+
+  <div>
+    <input type="color" id="color-picker" value="#ffffff" />
+    <button id="btn-guardar">Guardar Diseño</button>
+    <button id="btn-limpiar">Reiniciar Colores</button>
+  </div>
+
+  <script>
+    const svg = document.getElementById('camiseta-svg');
+    const colorPicker = document.getElementById('color-picker');
+    const btnGuardar = document.getElementById('btn-guardar');
+    const btnLimpiar = document.getElementById('btn-limpiar');
+
+    let parteSeleccionada = null;
+
+    svg.addEventListener('click', (event) => {
+      if (event.target.classList.contains('parte-camiseta')) {
+        parteSeleccionada = event.target;
+        const colorActual = parteSeleccionada.getAttribute('fill');
+        colorPicker.value = colorActual;
+      }
+    });
+
+    colorPicker.addEventListener('input', (event) => {
+      if (parteSeleccionada) {
+        parteSeleccionada.setAttribute('fill', event.target.value);
+      }
+    });
+
+    btnLimpiar.addEventListener('click', () => {
+      document.querySelectorAll('.parte-camiseta').forEach(el => {
+        el.setAttribute('fill', '#ffffff');
+      });
+    });
+    btnGuardar.addEventListener('click', async () => {
+  // Obtener colores actuales de cada parte
+  const diseño = {
+   torsoColor: document.getElementById('torso').getAttribute('fill'),
+    mangaIzqColor: document.getElementById('manga-izquierda').getAttribute('fill'),
+    mangaDerColor: document.getElementById('manga-derecha').getAttribute('fill'),
+   cuelloColorder: document.getElementById('cuelloder').getAttribute('fill'),
+   cuelloColorizq: document.getElementById('cuelloizq').getAttribute('fill')
+  };
+  // Enviar via fetch al servidor
+  const resp = await fetch('/api/camisetas', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + localStorage.getItem('token')
+    },
+    body: JSON.stringify(diseño)
+  });
+  const data = await resp.json();
+  console.log('Diseño guardado en servidor:', data);
+});
+
+
+  </script>
+</body>
+</html>
+
+
