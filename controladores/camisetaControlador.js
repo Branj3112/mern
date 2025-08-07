@@ -1,9 +1,32 @@
 
-const Camiseta = require('../modelos/camisetaEsquema'); 
+const Camiseta = require('../modelos/camisetaEsquema');
+const Usuario = require('../modelos/usuarioEsquema'); // Importamos el modelo de Usuario 
 exports.obtenerCamisetas = async (req, res) => {
     try {
-      const camisetas = await Camiseta.find();    // Busca todos los documentos de usuarios en la BD
-      res.json(Camiseta);                       // Responde con la lista en formato JSON
+      // Supongamos que ya tenemos una lista de camisetas obtenida de la base de datos:
+const camisetas = await Camiseta.find();  // Lista de camisetas desde la coleccion (ejemplo)
+
+// Enriquecer cada camiseta con datos del usuario creador:
+const camisetasConUsuario = await Promise.all(
+  camisetas.map(async (c) => {
+    try {
+      // Buscar al usuario por ID (c.creador) y seleccionar solo nombre y correo
+      const usuario = await Usuario.findById(c.creador).select('nombre correo');
+      return {
+        ...c.toObject(),        // Convertir el documento de Mongoose a objeto plano JS
+        creador: usuario || null // Reemplazar el campo 'creador' con los datos del usuario (o null si no se encontró)
+      };
+    } catch (error) {
+      // En caso de error al buscar usuario, devolvemos la camiseta con 'creador' null
+      return {
+        ...c.toObject(),
+        creador: null
+      };
+    }
+  })
+);
+
+      res.json(camisetasConUsuario);                       // Responde con la lista en formato JSON
     } catch (error) {
       res.status(500).json({ error: 'Error del servidor' }); // Error genérico en caso de fallo
     }
@@ -27,6 +50,8 @@ exports.obtenerCamisetas = async (req, res) => {
     try {
 
     const nuevoCamiseta = new Camiseta(req.body);
+    nuevoCamiseta.creador = req.usuarioId; // Asignar el ID del usuario que creó la camiseta
+    console.log(req.usuarioId); // Verificar que el ID del usuario se está asignando correctamente
       const camisetaGuardada = await nuevoCamiseta.save();      // Guardamos en la base de datos
       res.status(201).json(camisetaGuardada);    // Devolvemos el usuario creado con código 201 (Creado)
     } catch (error) {

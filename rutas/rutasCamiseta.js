@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const camisetaController = require('../controladores/camisetaControlador');
+const { verificarToken } = require('../seguridad/auth');
 router.get('',camisetaController.obtenerCamisetas);
-router.get('/:id', camisetaController.obtenercamisetaxid);
-router.post('/', camisetaController.crearCamiseta);
-router.put('/:id', camisetaController.modificarCamiseta);
-router.delete('/:id', camisetaController.eliminarCamiseta);
+router.get('/:id',verificarToken, camisetaController.obtenercamisetaxid);
+router.post('/',verificarToken, camisetaController.crearCamiseta);
+router.put('/:id',verificarToken, camisetaController.modificarCamiseta);
+router.delete('/:id',verificarToken, camisetaController.eliminarCamiseta);
 module.exports = router;
