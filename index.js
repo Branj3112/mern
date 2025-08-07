@@ -1,10 +1,13 @@
+require('dotenv').config();
+const mongoURI = process.env.DB_HOST; // Cargar la URI de conexión desde las variables de entorno
 const mongoose = require('mongoose'); // importamos la librería Mongoose
 const path = require('path'); 
 const {verificartoken} = require('./seguridad/auth')// Importamos path para manejar rutas de archivos
 
+
 // URI de conexión a MongoDB (MongoDB Atlas en este caso). 
 // Reemplaza <usuario>, <password> y <tuBase> por tus datos reales.
-const mongoURI = 'mongodb+srv://BranMCintosch:123@brandon1.qjazz3a.mongodb.net/?retryWrites=true&w=majority&appName=Brandon1';
+
 
 // Opciones recomendadas para evitar advertencias (según la versión de Mongoose)
 const options = {
@@ -37,6 +40,9 @@ app.get('/registro', (req, res) => {
 
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+app.get('/carrusel', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'carrusel.html'));
 });
 
 
